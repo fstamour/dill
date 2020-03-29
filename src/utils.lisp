@@ -7,8 +7,9 @@
 
 (defun parent-directory (pathname)
   "Create a pathname, it probably has bugs."
-  (make-pathname :directory
-		 (butlast (pathname-directory pathname))))
+  (let ((parent (butlast (pathname-directory pathname))))
+    (when parent
+      (make-pathname :directory parent))))
 
 
 (defun split-by-newline (string)

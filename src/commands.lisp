@@ -31,6 +31,11 @@
   "The default's git configuration to put in .git/config")
 
 
+(defun find-repository (&optional (path (truename "")))
+  "Recursively look for a .git repository"
+  (when path
+    (or (cl-fad:directory-exists-p (merge-pathnames ".git/" path))
+	(find-repository (parent-directory (truename path))))))
 
 (defun command-init (directory &key bare &allow-other-keys)
   (let ((directories '(".git/refs/heads/"
@@ -44,6 +49,8 @@
 		 (".git/config" . ,+default-git-configuration+)
 		 (".git/description" . "Unnamed repository; edit this file 'description' to name the repository.")
 		 (".git/info/exclude" . "")))
+	;; TODO (listp directory) (so we can call (command-init "dir")
+	;;        instead of (command-init '("dir"))
 	;; TODO check if (length directory) > 1
 	(root (cl-fad:pathname-as-directory
 	       (or (first directory)
