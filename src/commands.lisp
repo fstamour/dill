@@ -47,10 +47,13 @@
 			   "~&~a[--help]~%"
 			   "~v@{~A~:*~}"
 			   "<command> [<args>]~%~%"
-			   "~AAvailable commands: ~{~(~a~)~}")
+			   "Available commands:")
 	    prelude
 	    prelude-length " "
-	    +commands+)))
+	    +commands+)
+    (loop :for (name . _) :in +commands+
+	 :do (format t "~&        ~(~a~)" name))))
+
 
 (defun command-log ()
   (error "Not implemented"))

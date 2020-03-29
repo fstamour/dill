@@ -29,7 +29,9 @@
 	    :components
 	    ((:file "package")
 	     (:file "utils")
-	     (:file "commands")
+	     (:file "git-repository")	; class "git-repository"
+	     (:file "config-parser")
+	     (:file "commands")		; command-line commands
 	     (:file "git")))
    (:module "tests"
 	    :components ())))
