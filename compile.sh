@@ -1,5 +1,5 @@
 #!/bin/sh
 
 sbcl --load ~/quicklisp/setup.lisp \
-     --load git.lisp \
+     --eval '(ql:quickload :dill)' \
      --script make-executable.lisp

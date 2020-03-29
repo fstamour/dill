@@ -1,44 +1,5 @@
 
-(ql:quickload
- '(#:access				; dig
-   #:alexandria				; de-facto standard utilities
-   #:alexa				; lexer generator
-   #:cl-fad				; paths, files and folders
-   #:flexi-streams			; octets <-> strings
-   #:split-sequence
-   #:optima				; pattern matching
-   #:track-best				
-   #:vas-string-metrics			; string distance
-   #:zlib))
-
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (defvar cl-user::project-name :glit))
-
-(defpackage #.cl-user::project-name
-  (:documentation "Write your own git")
-  (:use :cl #:alexandria))
-
-(in-package #.cl-user::project-name)
-
-(defvar +project-name+ (string-downcase cl-user::project-name))
-
-(defparameter +commands+
-  '(("add" . command-add)
-    ("cat-file" . command-cat-file)
-    ("checkout" . command-checkout)
-    ("commit" . command-commit)
-    ("hash-object" . command-hash-object)
-    ("help" . command-help)
-    ("init" . command-init)
-    ("log" . command-log)
-    ("ls-tree" . command-ls-tree)
-    ("merge" . command-merge)
-    ("rebase" . command-rebase)
-    ("rev-parse" . command-rev-parse)
-    ("rm" . command-rm)
-    ("show-ref" . command-show-ref)
-    ("status" . command-status)
-    ("tag" . command-tag)))
+(in-package #.dill.asd:project-name)
 
 (defclass git-repository ()
   ((worktree
@@ -55,48 +16,6 @@
     :accessor configuration)))
 
 
-;; TODO
-(defun command-init ())
-
-;; TODO
-(defun command-add ())
-;; TODO
-(defun command-cat-file ())
-;; TODO
-(defun command-checkout ())
-;; TODO
-(defun command-commit ())
-;; TODO
-(defun command-hash-object ())
-;; TODO
-(defun command-help ()
-  (let* ((prelude (format nil "usage: ~a " +project-name+))
-	 (prelude-length (length prelude)))
-    (format t (concatenate 'string
-			   "~&~a[--help]~%"
-			   "~v@{~A~:*~}"
-			   "<command> [<args>]~%")
-	    prelude
-	    prelude-length " ")))
-;; TODO
-(defun command-log ())
-;; TODO
-(defun command-ls-tree ())
-;; TODO
-(defun command-merge ())
-;; TODO
-(defun command-rebase ())
-;; TODO
-(defun command-rev-parse ())
-;; TODO
-(defun command-rm ())
-;; TODO
-(defun command-status ()
-  )
-;; TODO
-(defun command-show-ref ())
-;; TODO
-(defun command-tag ())
 
 (defvar *dummy-repositories*
   "./dummy-git-repositories/")
@@ -111,10 +30,6 @@
    "dummy-repo-2/" 
    *dummy-repositories*))
 
-(defun parent-directory (pathname)
-  "Create a pathname, it probably has bugs."
-  (make-pathname :directory
-		 (butlast (pathname-directory pathname))))
 
 (defvar +default-git-configuration+
     "
@@ -132,11 +47,6 @@
 "
   "Just a sample config to test the parser")
 
-(defun split-by-newline (string)
-  "Split a string by newlines, treat multiple newlines as one."
-  (split-sequence:split-sequence
-   #\Newline string
-   :remove-empty-subseqs t))
 
 (defun lex-line (string make-lexer-fn)
   "Tokenize a string
@@ -146,27 +56,6 @@ Take a string and a lexer-constructor."
         :while tok
           :collect tok))
 
-;; The equivalent regex:
-;; "\\\\\\s*\\n"
-(defvar +join-line-on-backspace-regex+
-  (cl-ppcre:create-scanner
-   '(:sequence #\\
-     (:greedy-repetition 0 nil :whitespace-char-class)
-     #\newline))
-  "The regex used in the function join-line-on-backspace.")
-
-(defun join-line-on-backspace (string)
-  (cl-ppcre:regex-replace-all +join-line-on-backspace-regex+ string ""))
-
-#+nil
-(progn
-  (cl-ppcre:regex-replace-all +join-line-on-backspace-regex+ +default-git-configuration+ "")
-  (cl-ppcre:regex-replace-all +join-line-on-backspace-regex+ "
-
-he\\  
-llo
-
-" ""))
 
 (alexa:define-string-lexer config-lexer
     ()
@@ -185,9 +74,6 @@ llo
     ("\\[(?<NAME>[^\\]]+)\\]" (return $NAME))
     ;; anything else is as-is
     ("[^\\s]+" (return $@)))
-
-(defun length=1 (list)
-  (null (cdr list)))
 
 (defun parse-config (string
 		     &optional (config
@@ -261,32 +147,12 @@ The top-level hash-table is the sections, the other is the key-values"
 ;; => nil
 
 
-(defun remove-last-newline (string)
-  (subseq string 0
-	  (if (alexandria:ends-with #\newline string)
-	      (1- (length string))
-	      nil)))
-
-#+nil
-(equal
- (remove-last-newline "asdf")
- (remove-last-newline "asdf
-"))
-
 (defun parse-ref (string)
   (second
    (split-sequence:split-sequence
     #\space string
     :remove-empty-subseqs t)))
 
-;; inneficient, but it works
-;; see cl-fad:merge-pathnames-as-file for faster, but not as user-friendly
-(defun join-path (root &rest parts)
-  (let ((path root)
-	(last-part (lastcar parts)))
-    (loop :for part :in (butlast parts)
-       :do (setf path (merge-pathnames (format nil "~a/" part) path)))
-    (merge-pathnames last-part path)))
 
 (defun repo-obj-path (repository hash)
   (join-path (gitdir repository)
@@ -403,50 +269,5 @@ a
     (loop :for start :across register-starts
        :for end :across register-ends
        :collect (subseq string start end))))
-
-
-;;;; command line stuff
-
-(defun find-command (name)
-  (cdr (assoc name +commands+ :test 'equal)))
-
-(defun suggest-command (input)
-  (let ((best-candidate nil)
-	(best-score 0.0))
-    (loop
-       :for (name . _) :in +commands+
-       :for score = (vas-string-metrics:jaro-winkler-distance input name)
-       :when (or
-	      (> score best-score)
-	      (null best-candidate))
-       :do (setf best-candidate name
-		 best-score score))
-    (when (> best-score 0.80)
-      (format t "~&~%The most similar command is~%        ~a"
-	      best-candidate)
-      best-candidate)))
-
-#+nil (suggest-command "statsu")
-
-(defun unknown-command (command-name)
-  (format t "~&~a: '~a' is not a ~0@*~a command. See '~0@*~a --help'"
-	  +project-name+ command-name)
-  (suggest-command command-name))
-
-(defun main (args)
-  (let* ((first-argument (second args))
-	 (command (find-command first-argument))
-	 (command-arguments (cddr args)))
-    (cond
-      ((null first-argument)
-       (command-help))
-      ((null command)
-       (unknown-command first-argument))
-      (t
-       (apply command command-arguments)))))
-
-(defparameter uiop/image:*image-entry-point*
-  #'(lambda ()
-      (main (uiop/image:raw-command-line-arguments))))
 
 
