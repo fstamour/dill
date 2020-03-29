@@ -63,3 +63,54 @@ llo
        :do (setf path (merge-pathnames (format nil "~a/" part) path)))
     (merge-pathnames last-part path)))
 
+(defun list-hash-table (list &rest make-hash-table-arguments)
+  "Convert a list to a hash-table where the keys are the elements of the
+list and the values are T."
+  (let ((hash-table (apply #'make-hash-table make-hash-table-arguments)))
+    (loop :for element :in list
+       :do (setf (gethash element hash-table) t))
+    hash-table))
+
+(defun hash-table-key-union (ht1 ht2)
+  "Compute a list of keys that are present in both hash-tables"
+  (uiop:while-collecting (collect-union)
+    (loop :for key :being :the :hash-key :of ht1
+       :when(gethash key ht2)
+       :do (collect-union key))))
+
+(defun hash-table-key-difference (ht1 ht2)
+  "Compute a list of keys that are present only in ht1"
+  (uiop:while-collecting (collect-difference)
+    (loop :for key :being :the :hash-key :of ht1
+       :unless (gethash key ht2)
+       :do (collect-difference key))))
+
+(defun compare-hash-tables (ht1 ht2)
+  "Returns 3 values:
+1. The list of keys common to both hash-table.
+2. The list of keys present in ht1 only
+3. The list of keys present in ht2 only "
+  (values
+   (hash-table-key-union ht1 ht2)
+   (hash-table-key-difference ht1 ht2)
+   (hash-table-key-difference ht2 ht1)))
+
+#+nil
+(compare-hash-tables
+ (list-hash-table '('a 'b 'a 'd) :test 'equal)
+ (list-hash-table '('c 'b 'a) :test 'equal))
+;; => ('A 'B), ('D), ('C)
+
+
+(defun list-tree (root)
+  "List all the files and folders in a path, it returns a hash-table
+with the paths as keys and T as values (basically a set)."
+  (let ((files (make-hash-table :test 'equal)))
+    (cl-fad:walk-directory
+     root
+     #'(lambda (pathname
+		&aux (relative-path (enough-namestring pathname root)))
+	 (when (not (zerop (length relative-path)))
+	   (setf (gethash relative-path files) t)))
+     :directories t)
+    files))
