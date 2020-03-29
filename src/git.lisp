@@ -15,6 +15,19 @@
    *dummy-repositories*))
 
 
+#+nil
+(let ((arguments
+       (apply-argv:parse-argv
+	(split-sequence:split-sequence
+	 #\space
+	 "-q --quiet --bare --template=somedir --separate-git-dir --shared=permissions dir"))))
+  (if (listp (first arguments))
+      `(,(caar arguments) ,@(rest arguments))
+      arguments))
+
+#+nil
+(ensure-directories-exist
+ (merge-pathnames "fresh/.git/" *dummy-repositories*))
 
 
 (defun repo-obj-path (repository hash)

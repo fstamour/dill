@@ -19,10 +19,49 @@
     ("status" . command-status)
     ("tag" . command-tag)))
 
+(defvar +default-git-configuration+
+    "
+[core]
+    repositoryformatversion = 0
+    filemode = true
+    bare = false
+    logallrefupdates = true
+
+"
+  "The default's git configuration to put in .git/config")
 
 
-(defun command-init ()
+
+(defun command-init (directory &key bare &allow-other-keys)
+  (let ((directories '(".git/refs/heads/"
+		       ".git/refs/tags/"
+		       ".git/objects/info/"
+		       ".git/objects/packs/"
+		       ".git/hooks/"
+		       ".git/info/exclude"
+		       ".git/branches/"))
+	(files `((".git/HEAD" . "ref: refs/heads/master")
+		 (".git/config" . ,+default-git-configuration+)
+		 (".git/description" . "Unnamed repository; edit this file 'description' to name the repository.")
+		 (".git/info/exclude" . "")))
+	;; TODO check if (length directory) > 1
+	(root (cl-fad:pathname-as-directory
+	       (or (first directory)
+		   "."))))
+    ;; create the directories
+    (loop :for directory :in directories
+       :do (ensure-directories-exist
+	    (merge-pathnames directory root)))
+    ;; create the files
+    (loop :for (file . content) :in files
+       :do (alexandria:write-string-into-file
+	    content (merge-pathnames file root)))))
+
+(defun usage-init ()
   (error "Not implemented"))
+
+#+nil
+(command-init (list (merge-pathnames "fresh/" *dummy-repositories*)))
 
 
 (defun command-add ()
@@ -108,6 +147,24 @@
 	  +project-name+ command-name)
   (suggest-command command-name))
 
+;; wrapper around apply-argv:parse-argv that normalizes the output
+;; by always returning a list as the first argument
+(defun parse-argv (argv)
+  (let ((arguments (apply-argv:parse-argv argv)))
+    (if (or
+	 (null arguments)
+	 (not (listp (first arguments))))
+	`(() ,@arguments)
+	arguments)))
+
+#|
+(parse-argv '())
+;; => '(nil)
+(parse-argv '("--version"))
+;; => (nil :version t)
+(parse-argv '("--tag" "2.0"))
+;; => (nil :tag "2.0")
+|#
 
 (defun main (args)
   (let* ((first-argument (second args))
@@ -119,7 +176,13 @@
       ((null command)
        (unknown-command first-argument))
       (t
-       (apply command command-arguments)))))
+       (apply command (parse-argv command-arguments))))))
+
+#|
+Those two should do the same thing:
+(main '(nil "init" "asdf"))
+(main '(nil "init" "asdf/"))
+|#
 
 (defparameter uiop/image:*image-entry-point*
   #'(lambda ()

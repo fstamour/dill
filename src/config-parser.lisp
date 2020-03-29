@@ -9,23 +9,6 @@
 (in-package #.dill.asd:project-name)
 
 
-;; TODO move to tests/
-(defvar +default-git-configuration+
-    "
-
-# a comment
-[core]
-    repositoryformatversion = 0
-    filemode = true # another comment  
-    bare = false
-    logallrefupdates = true
-    # and multiline comments \\
- that goes on and on
-
-
-"
-  "Just a sample config to test the parser")
-
 
 ;; This is from alexa's documentation
 (defun lex-line (string make-lexer-fn)
@@ -84,8 +67,19 @@ The top-level hash-table is the sections, the other is the key-values"
 
 #+nil
 (let ((config
-       (parse-config
-	+default-git-configuration+)))
+       (parse-config "
+
+# a comment
+[core]
+    repositoryformatversion = 0
+    filemode = true # another comment  
+    bare = false
+    logallrefupdates = true
+    # and multiline comments \\
+ that goes on and on
+
+
+")))
   (mapcar #'(lambda (el)
 	      (if (hash-table-p el)
 		  (hash-table-plist el)

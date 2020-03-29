@@ -13,11 +13,12 @@
   :version "0.1.0"
   :author "Francis St-Amour"
   :licence "GNU GPLv3"
-  :depends-on (#:access			; dig
-	       #:alexandria		; de-facto standard utilities
-	       #:alexa			; lexer generator
-	       #:cl-fad			; paths, files and folders
-	       #:flexi-streams		; octets <-> strings
+  :depends-on (#:access		       ; dig
+	       #:alexandria	       ; de-facto standard utilities
+	       #:alexa		       ; lexer generator
+	       #:apply-argv	       ; command-line argument parsing
+	       #:cl-fad		       ; paths, files and folders
+	       #:flexi-streams	       ; octets <-> strings
 	       #:split-sequence
 	       #:optima			; pattern matching
 	       #:track-best				
