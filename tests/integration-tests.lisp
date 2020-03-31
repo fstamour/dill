@@ -13,7 +13,7 @@
   (command-init (list root))
   (multiple-value-bind (_ extra-paths missing-paths)
       (compare-hash-tables
-       (list-tree root)
+       (list-tree-as-hash-table root)
        (list-hash-table
 	'(".git/HEAD"
 	  ".git/"

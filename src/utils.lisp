@@ -2,8 +2,8 @@
 (in-package #.dill.asd:project-name)
 
 (defun length=1 (list)
-  (null (cdr list)))
-
+  (and listp
+       (null (cdr list))))
 
 (defun parent-directory (pathname)
   "Create a pathname, it probably has bugs."
@@ -103,6 +103,17 @@ list and the values are T."
 
 
 (defun list-tree (root)
+  "List all the files and folders in a path."
+  (uiop:while-collecting (collect-file)
+    (cl-fad:walk-directory
+     root
+     #'(lambda (pathname
+		&aux (relative-path (enough-namestring pathname root)))
+	 (when (not (zerop (length relative-path)))
+	   (collect-file relative-path)))
+     :directories t)))
+
+(defun list-tree-as-hash-table (root)
   "List all the files and folders in a path, it returns a hash-table
 with the paths as keys and T as values (basically a set)."
   (let ((files (make-hash-table :test 'equal)))
@@ -114,3 +125,17 @@ with the paths as keys and T as values (basically a set)."
 	   (setf (gethash relative-path files) t)))
      :directories t)
     files))
+
+(defun hexp (string)
+  "Returns true if the string is all hexadecimal characters"
+  (and (stringp string)
+       (multiple-value-bind (from to)
+	   (ppcre:scan "^[a-fA-F0-9]*$" string)
+	 (and from to))))
+
+(defun sha1p (string)
+  "Returns true if the string is a 40 hexadecimal characters"
+  (and (stringp string)
+       (= 40 (length string))
+       (hexp string)))
+
