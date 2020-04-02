@@ -1,34 +1,27 @@
 ;;;; scratch code, repl ftw
 
+(in-package cl-user)
+
+*a*
+
 (in-package #.dill.asd:project-name)
 
-(defvar *dummy-repositories*
-  "./dummy-git-repositories/")
+;;; Init
+(progn
+  (defvar *dummy-repositories*
+    (truename "./dummy-git-repositories/"))
 
-(defparameter *empty-repository*
-  (make-git-repository
-   (merge-pathnames
-    "dummy-repo-1/" 
-    *dummy-repositories*)))
+  (defparameter *empty-repository*
+    (make-git-repository
+     (merge-pathnames
+      "dummy-repo-1/"
+      *dummy-repositories*)))
 
-(defparameter *repository-with-a-readme*
-  (make-git-repository
-   (merge-pathnames
-    "dummy-repo-2/" 
-    *dummy-repositories*)))
-
-(defun repo-read-head (repository)
-  "Read the HEAD of a repository"
-  (parse-ref
-   (remove-last-newline
-    (alexandria:read-file-into-string
-     (merge-pathnames "HEAD" (gitdir repository))))))
-
-(defun repo-resolve-ref (repository ref)
-  "Resolve a ref"
-  (remove-last-newline
-   (alexandria:read-file-into-string
-    (merge-pathnames ref (gitdir repository)))))
+  (defparameter *repository-with-a-readme*
+    (make-git-repository
+     (merge-pathnames
+      "dummy-repo-2/"
+      *dummy-repositories*))))
 
 
 (let* ((repo *repository-with-a-readme*)
@@ -36,25 +29,18 @@
        (hash (repo-resolve-ref repo ref)))
   (sha1p hash))
 
-
 (repo-list-object *repository-with-a-readme*)
+("08f4360732d08448be6eeccc8a9036fa432e1bbe"
+ "c29d55b1dd717f9942c1dc9b9c8e201dcb1bcaa8"
+ "ea6b1222f0a57b059054a29dfcd48eaccdbb2fc7")
 
+(mapcar
+ (alexandria:curry
+  #'repo-find-object *repository-with-a-readme*)
+ '("08f72"
+   "08f4"))
+;; => (NIL "08f4360732d08448be6eeccc8a9036fa432e1bbe")
 
-;; RENDU: given a list and a string
-;; find an item that start by the string
-;; and make sure it's the only one
-;; could try to "find-all"
-(defun find-)
-
-
-(position "08f"
-	  '(
-	    "c29d55b1dd717f9942c1dc9b9c8e201dcb1bcaa8"
-	    "08f72"
-	    "08f4360732d08448be6eeccc8a9036fa432e1bbe"
-	    "ea6b1222f0a57b059054a29dfcd48eaccdbb2fc7")
-	  :test #'alexandria:starts-with-subseq
-	  )
 
 (defvar *first-commit*
   (let* ((repo *repository-with-a-readme*)
@@ -83,6 +69,4 @@ the type can be one of these:
  * tag
  * blob
 |#
-
-
 

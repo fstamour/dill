@@ -9,6 +9,7 @@
      (unwind-protect (progn ,@body)
        (uiop:run-program (list "rm" "-r" (namestring ,var))))))
 
+
 (with-temporary-directory (root)
   (command-init (list root))
   (multiple-value-bind (_ extra-paths missing-paths)

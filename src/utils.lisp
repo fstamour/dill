@@ -2,7 +2,7 @@
 (in-package #.dill.asd:project-name)
 
 (defun length=1 (list)
-  (and listp
+  (and (listp list)
        (null (cdr list))))
 
 (defun parent-directory (pathname)

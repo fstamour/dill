@@ -21,7 +21,6 @@
 	       #:flexi-streams	       ; octets <-> strings
 	       #:split-sequence
 	       #:optima			; pattern matching
-	       #:track-best				
 	       #:vas-string-metrics	; string distance
 	       #:zlib)
   :serial t
