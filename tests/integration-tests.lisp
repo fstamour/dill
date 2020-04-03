@@ -1,44 +1,64 @@
 
-#+nil
 (in-package #:dill.test)
 
-(in-package #.dill.asd:project-name)
+(define-test integration)
+
+(defun random-identifier (length)
+  (let ((result (make-string length)))
+    (loop :for i :below length
+          :do (setf (aref result i)
+                    (alexandria:random-elt "abcdefghjkmnpqrstuvwxyz23456789")))
+    result))
+
+(defun make-temporary-directory ()
+  (loop :for name = (random-identifier 10)
+        :for pathname = (merge-pathnames
+                         (format nil "tmp.~a/" name)
+                         (uiop:temporary-directory))
+        ;; Stop after a hundred time
+        :for i :below 100
+        :while (cl-fad:directory-exists-p pathname)
+        :finally (progn
+                   (print i)
+                   (ensure-directories-exist pathname)
+                   (return pathname))))
 
 (defmacro with-temporary-directory ((var) &body body)
-  `(let ((,var (cl-fad:pathname-as-directory
-		(remove-last-newline
-		 (with-output-to-string (*standard-output*)
-		   (uiop:run-program '("mktemp" "-d") :output t))))))
+  `(let ((,var (make-temporary-directory)))
      (unwind-protect (progn ,@body)
-       (uiop:run-program (list "rm" "-r" (namestring ,var))))))
+       (uiop:delete-directory-tree ,var :validate t))))
 
-(defun test-init ()
-  (with-temporary-directory (root)
-    (command-init (list root))
-    (multiple-value-bind (_ extra-paths missing-paths)
-        (compare-hash-tables
-         (list-tree-as-hash-table root)
-         (list-hash-table
-	        '(".git/HEAD"
-	          ".git/"
-	          ".git/branches/"
-	          ".git/config"
-	          ".git/description"
-	          ".git/hooks/"
-	          ".git/info/"
-	          ".git/info/exclude"
-	          ".git/objects/"
-	          ".git/objects/info/"
-	          ".git/objects/packs/"
-	          ".git/refs/"
-	          ".git/refs/heads/"
-	          ".git/refs/tags/")
-	        :test 'equal))
-      (unless (emptyp extra-paths)
-        (error "init create more stuff than expected:~%~{~& * \"~a\"~}"
-	             extra-paths))
-      (unless (emptyp missing-paths)
-        (error "init failed to create some stuff :~%~{~& * \"~a\"~}"
-	             missing-paths))))
-  :passed)
+(defun check-expected-pathnames (root-pathname expected-pathnames)
+  (multiple-value-bind (_ extra-paths missing-paths)
+      (git::compare-hash-tables
+       (git::list-tree-as-hash-table root-pathname)
+       (git::list-hash-table expected-pathnames :test 'equal))
+    (declare (ignore _))
+    (unless (emptyp extra-paths)
+      (error "There was more pathnames than expected:~%~{~& * \"~a\"~}"
+	           extra-paths))
+    (unless (emptyp missing-paths)
+      (error "Some pathnames were missing :~%~{~& * \"~a\"~}"
+	           missing-paths))))
+
+(define-test (integration "Tests git init in an empty directory") ()
+  (false
+   (with-temporary-directory (root)
+     (git::command-init (list root))
+     (check-expected-pathnames
+      root
+      '(".git/HEAD"
+	      ".git/"
+	      ".git/branches/"
+	      ".git/config"
+	      ".git/description"
+	      ".git/hooks/"
+	      ".git/info/"
+	      ".git/info/exclude"
+	      ".git/objects/"
+	      ".git/objects/info/"
+	      ".git/objects/packs/"
+	      ".git/refs/"
+	      ".git/refs/heads/"
+	      ".git/refs/tags/")))))
 

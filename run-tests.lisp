@@ -1,6 +1,7 @@
 
-(in-package #:cl-user)
+(in-package #:dill.test)
 
-(print
- (git::test-all))
+(uiop:setup-temporary-directory)
+
+(test-all)
 

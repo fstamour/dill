@@ -1,6 +1,6 @@
 
-(in-package #.dill.asd:project-name)
+(in-package #:dill.test)
 
 (defun test-all ()
-  (test-init))
+  (parachute:test 'integration))
 
