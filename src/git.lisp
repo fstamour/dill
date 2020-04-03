@@ -32,17 +32,17 @@
 		       (hexp parent-directory-name)))))
      :directories t)))
 
-(defun find-object (repo object-specifier)
+(defun repo-find-object (repo object-specifier)
   "Find an object given a specifier (a hash, a partial hash"
   (cond
     ;; If it's a full hash
     ((sha1p object-specifier) object-specifier)
     ;; If it's a partial hash
     ((hexp object-specifier)
-     (let ((candidates))
-       (remove-if-not
-        (alexandria:curry #'alexandria:starts-with-subseq object-specifier)
-        (repo-list-object repo))
+     (let ((candidates
+             (remove-if-not
+              (alexandria:curry #'alexandria:starts-with-subseq object-specifier)
+              (repo-list-object repo))))
        (if (length=1 candidates)
            (first candidates)
            ;; else: TODO use a restart

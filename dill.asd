@@ -10,7 +10,7 @@
 
 (asdf:defsystem #:dill
   :description "Implementation of git purely in common lisp"
-  :version "0.1.0"
+  :version "0.0.1"
   :author "Francis St-Amour"
   :licence "GNU GPLv3"
   :depends-on (#:access		       ; dig
@@ -23,6 +23,7 @@
 	       #:optima			; pattern matching
 	       #:vas-string-metrics	; string distance
 	       #:zlib)
+  :in-order-to ((asdf:test-op (asdf:test-op :dill.test)))
   :serial t
   :components
   ((:module "src"
