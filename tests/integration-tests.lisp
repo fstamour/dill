@@ -41,24 +41,25 @@
       (error "Some pathnames were missing :~%~{~& * \"~a\"~}"
 	           missing-paths))))
 
+(defvar +git-init-expected-pathnames+
+  '(".git/HEAD"
+	  ".git/"
+	  ".git/branches/"
+	  ".git/config"
+	  ".git/description"
+	  ".git/hooks/"
+	  ".git/info/"
+	  ".git/info/exclude"
+	  ".git/objects/"
+	  ".git/objects/info/"
+	  ".git/objects/packs/"
+	  ".git/refs/"
+	  ".git/refs/heads/"
+	  ".git/refs/tags/"))
+
 (define-test (integration "Tests git init in an empty directory") ()
   (false
    (with-temporary-directory (root)
      (git::command-init (list root))
-     (check-expected-pathnames
-      root
-      '(".git/HEAD"
-	      ".git/"
-	      ".git/branches/"
-	      ".git/config"
-	      ".git/description"
-	      ".git/hooks/"
-	      ".git/info/"
-	      ".git/info/exclude"
-	      ".git/objects/"
-	      ".git/objects/info/"
-	      ".git/objects/packs/"
-	      ".git/refs/"
-	      ".git/refs/heads/"
-	      ".git/refs/tags/")))))
+     (check-expected-pathnames root +git-init-expected-pathnames+))))
 
