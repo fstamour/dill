@@ -49,6 +49,6 @@ fi
 git diff-index --check --cached $against --
 
 # run the tests
-nix-shell --pure -p sbcl --run ./tests.sh
+nix-shell --pure -p lispPackages.quicklisp sbcl --run ./tests.sh
 
 echo "Pre-commit hook done"
