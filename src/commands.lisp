@@ -39,30 +39,29 @@
 
 (defun command-init (directory &key bare &allow-other-keys)
   (let ((directories '(".git/refs/heads/"
-		       ".git/refs/tags/"
-		       ".git/objects/info/"
-		       ".git/objects/packs/"
-		       ".git/hooks/"
-		       ".git/info/exclude"
-		       ".git/branches/"))
-	(files `((".git/HEAD" . "ref: refs/heads/master")
-		 (".git/config" . ,+default-git-configuration+)
-		 (".git/description" . "Unnamed repository; edit this file 'description' to name the repository.")
-		 (".git/info/exclude" . "")))
-	;; TODO (listp directory) (so we can call (command-init "dir")
-	;;        instead of (command-init '("dir"))
-	;; TODO check if (length directory) > 1
-	(root (cl-fad:pathname-as-directory
-	       (or (first directory)
-		   "."))))
+		                   ".git/refs/tags/"
+		                   ".git/objects/info/"
+		                   ".git/objects/packs/"
+		                   ".git/hooks/"
+		                   ".git/info/exclude"
+		                   ".git/branches/"))
+	      (files `((".git/HEAD" . "ref: refs/heads/master")
+		             (".git/config" . ,+default-git-configuration+)
+		             (".git/description" . "Unnamed repository; edit this file 'description' to name the repository.")
+		             (".git/info/exclude" . "")))
+	      ;; TODO (listp directory) (so we can call (command-init "dir")
+	      ;;        instead of (command-init '("dir"))
+	      ;; TODO check if (length directory) > 1
+	      (root (cl-fad:pathname-as-directory (or (first directory) "."))))
     ;; create the directories
     (loop :for directory :in directories
-       :do (ensure-directories-exist
-	    (merge-pathnames directory root)))
+          :do (ensure-directories-exist
+	             (merge-pathnames directory root)))
     ;; create the files
     (loop :for (file . content) :in files
-       :do (alexandria:write-string-into-file
-	    content (merge-pathnames file root)))))
+          :do (alexandria:write-string-into-file
+	             content (merge-pathnames file root)))
+    (format t "Initialized empty Git repository in \"~a\"." directory)))
 
 (defun usage-init ()
   (error "Not implemented"))
