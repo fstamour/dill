@@ -2,11 +2,15 @@
 (defpackage #:virtual-file-system
   (:nicknames #:vfs)
   (:use #:cl #:alexandria)
+  (:import-from
+   #:dill.utils
+   #:remove-prefix)
   (:export
    ;; classes
    #:vfs
    #:physical-vfs
    #:memory-backed-vfs
+   #:vfs-path
 
    ;; cl-like interface
    #:vfs-open

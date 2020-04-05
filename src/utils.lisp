@@ -1,5 +1,33 @@
 
-(in-package #.dill.asd:project-name)
+(defpackage #:dill.utils
+  (:use #:cl)
+  (:export
+   ;; Predicates
+   #:length=1
+   #:sha1p
+   #:hexp
+
+   ;; Pathname manipulation and IO
+   #:parent-directory
+   #:join-path
+   #:list-tree
+   #:list-tree-as-hash-table
+
+   ;; String manipulation
+   #:split-by-newline
+   #:join-line-on-backspace
+   #:remove-last-newline
+   #:remove-prefix
+
+   ;; Hash-trees as sets
+   #:hash-table-key-union
+   #:hash-table-key-difference
+   #:compare-hash-tables
+
+   ;; Conversion
+   #:list-hash-table))
+
+(in-package #:dill.utils)
 
 (defun length=1 (list)
   (and (listp list)

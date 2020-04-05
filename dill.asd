@@ -30,8 +30,9 @@
   :components
   ((:module "src"
 	    :components
-	    ((:file "package")
-	     (:file "utils")
+	    ((:file "utils")
+	     (:file "vfs")
+	     (:file "package")
 	     (:file "git-repository")	; class "git-repository"
 	     (:file "config-parser")
 	     (:file "rfc2822-parser") ; to parse commits, trees and tags
