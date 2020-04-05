@@ -75,6 +75,7 @@
 	     (when ,stream
 	       (vfs-close ,vfs ,stream :abort ,abortp))))))))
 
+#+nil
 (with-vfs-open-file (make-instance 'physical-vfs)
     (stream "./readme.md" :direction :input)
   (alexandria:read-stream-content-into-string stream))
