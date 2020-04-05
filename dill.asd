@@ -39,4 +39,13 @@
 	     (:file "commands")	      ; command-line commands
 	     (:file "git")))
    (:module "tests"
-	    :components ())))
+	    :components ())
+   (:module "samples"
+	    :components
+	    ((:file "samples")
+	     (:static-file "empty.tgz"
+			   :description "An empty git repository")
+	     (:static-file "empty-readme.tgz"
+			   :description "A git repository with an empty readme.")
+	     (:static-file "empty-with-staged-readme.tgz"
+			   :description "An empty git repository with an empty readme in staging.")))))
