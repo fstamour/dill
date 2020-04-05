@@ -3,7 +3,10 @@
 # stop on first error
 set -e
 
-rm -r build_outputs
+if [ -d build_outputs ]; then
+  rm -r build_outputs
+fi
+mkdir -p build_outputs
 
 dockerfile=git-gen.dockerfile
 tag=$dockerfile
