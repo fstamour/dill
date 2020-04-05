@@ -1,7 +1,21 @@
 
 (defpackage #:virtual-file-system
   (:nicknames #:vfs)
-  (:use #:cl #:alexandria))
+  (:use #:cl #:alexandria)
+  (:export
+   ;; classes
+   #:vfs
+   #:physical-vfs
+   #:memory-backed-vfs
+
+   ;; cl-like interface
+   #:vfs-open
+   #:vfs-close
+   #:with-vfs-open-file
+
+   ;; Support function
+   #:read-archive-into-memory
+   ))
 
 (in-package #:virtual-file-system)
 
@@ -79,3 +93,27 @@
 (with-vfs-open-file (make-instance 'physical-vfs)
     (stream "./readme.md" :direction :input)
   (alexandria:read-stream-content-into-string stream))
+
+(defun read-archive-into-memory (pathname &optional in-memory-archive)
+  "Returns a \"flat\" hash-table"
+  (when in-memory-archive
+    (check-type in-memory-archive hash-table))
+  (let ((result (or in-memory-archive
+		    (make-hash-table :test 'equal))))
+    (gzip-stream:with-open-gzip-file (stream pathname)
+      (archive:with-open-archive (archive stream :direction :input)
+	(archive:do-archive-entries (entry archive)
+	  (let ((name (remove-prefix "./" (archive:name entry)))
+		(mode (slot-value entry 'archive::mode)))
+	    (unless (emptyp name)
+	      (setf (gethash name result)
+		    (cond
+		      ((archive:entry-directory-p entry)
+		       (list :directory mode))
+		      ((archive:entry-regular-file-p entry)
+		       (list :file
+			     mode
+			     (alexandria:read-stream-content-into-byte-vector
+			      (archive:entry-stream entry))))
+		      (t (error "Unsupported entry type.")))))))))
+    result))

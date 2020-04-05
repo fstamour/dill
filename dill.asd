@@ -13,12 +13,14 @@
   :version "0.0.1"
   :author "Francis St-Amour"
   :licence "GNU GPLv3"
-  :depends-on (#:access		       ; dig
+  :depends-on (#:access		       ; dig into structures
 	       #:alexandria	       ; de-facto standard utilities
 	       #:alexa		       ; lexer generator
 	       #:apply-argv	       ; command-line argument parsing
+	       #:archive	       ; to read tar archive
 	       #:cl-fad		       ; paths, files and folders
 	       #:flexi-streams	       ; octets <-> strings
+	       #:gzip-stream	       ; to read gzip file
 	       #:split-sequence
 	       #:optima			; pattern matching
 	       #:vas-string-metrics	; string distance

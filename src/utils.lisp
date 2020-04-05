@@ -139,3 +139,18 @@ with the paths as keys and T as values (basically a set)."
        (= 40 (length string))
        (hexp string)))
 
+(defun remove-prefix (prefix sequence)
+  (or
+   (multiple-value-bind (foundp suffix)
+       (alexandria:starts-with-subseq
+	prefix
+	sequence
+	:return-suffix t)
+     (declare (ignore foundp))
+     suffix)
+   sequence))
+
+#+nil
+(equal
+ (remove-prefix "./" "./readme")
+ (remove-prefix "./" "readme"))
