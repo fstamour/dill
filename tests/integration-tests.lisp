@@ -63,3 +63,11 @@
      (git::command-init (list root))
      (check-expected-pathnames root +git-init-expected-pathnames+))))
 
+(define-test (integration "Open an empty git-repository") ()
+  (true
+   (with-temporary-directory (root)
+     (git::command-init (list root))
+     (let ((repository
+	    (git::make-git-repository root)))
+       (zerop
+	  (git::get-config repository "core" "repositoryformatversion"))))))
