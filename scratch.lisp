@@ -1,28 +1,33 @@
 ;;;; scratch code, repl ftw
 
-(in-package cl-user)
-
-*a*
-
 (in-package #.dill.asd:project-name)
 
-;;; Init
-(progn
-  (defvar *dummy-repositories*
-    (truename "./dummy-git-repositories/"))
+(defparameter *empty-readme-vfs*
+  (make-instance 'memory-backed-vfs
+		 :content
+		 (vfs:read-archive-into-memory
+		  (dill.samples:find-sample-pathname :empty-readme))))
 
-  (defparameter *empty-repository*
-    (make-git-repository
-     (merge-pathnames
-      "dummy-repo-1/"
-      *dummy-repositories*)))
+(uiop:while-collecting (collect)
+  (vfs:vfs-map *empty-readme-vfs*
+	       #'collect))
 
-  (defparameter *repository-with-a-readme*
-    (make-git-repository
-     (merge-pathnames
-      "dummy-repo-2/"
-      *dummy-repositories*))))
+(uiop:while-collecting (collect)
+  (vfs:vfs-map-files *empty-readme-vfs*
+	       #'collect))
 
+(uiop:while-collecting (collect)
+  (vfs:vfs-map-directories *empty-readme-vfs*
+	       #'collect))
+
+(maphash #'(lambda (key value)
+	     (when (eq :directory (first value))
+	       (print key)))
+	 (slot-value *empty-readme-vfs* 'vfs::content))
+
+(defparameter *in-memory-repository*
+  (make-git-repository
+   ))
 
 (let* ((repo *repository-with-a-readme*)
        (ref (repo-read-head repo))
@@ -69,4 +74,3 @@ the type can be one of these:
  * tag
  * blob
 |#
-

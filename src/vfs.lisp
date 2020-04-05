@@ -17,6 +17,11 @@
    #:vfs-close
    #:with-vfs-open-file
 
+   ;; iteration
+   #:vfs-map
+   #:vfs-map-files
+   #:vfs-map-directories
+
    ;; Support function
    #:read-archive-into-memory
    ))
@@ -121,3 +126,56 @@
 			      (archive:entry-stream entry))))
 		      (t (error "Unsupported entry type.")))))))))
     result))
+
+(defgeneric vfs-map (vfs function)
+  (:documentation
+   "Call function on every file and directory in the virtual file system"))
+(defgeneric vfs-map-files (vfs function)
+  (:documentation
+   "Call function on every files in the virtual file system"))
+(defgeneric vfs-map-directories (vfs function)
+  (:documentation
+   "Call function on every directories in the virtual file system"))
+
+(defmethod vfs-map ((vfs memory-backed-vfs) function)
+  (maphash-keys
+   #'(lambda (pathname)
+       (funcall function
+		(make-instance 'vfs-path
+			       :vfs vfs
+			       :pathname pathname)))
+	 (slot-value vfs 'content)))
+
+(defmethod vfs-map-files ((vfs memory-backed-vfs) function)
+  (maphash
+   #'(lambda (pathname node)
+       (when (eq (first node) :file)
+	 (funcall function
+		  (make-instance 'vfs-path
+				 :vfs vfs
+				 :pathname pathname))))
+	 (slot-value vfs 'content)))
+
+(defmethod vfs-map-directories ((vfs memory-backed-vfs) function)
+  (maphash
+   #'(lambda (pathname node)
+       (when (eq (first node) :directory)
+	 (funcall function
+		  (make-instance 'vfs-path
+				 :vfs vfs
+				 :pathname pathname))))
+	 (slot-value vfs 'content)))
+
+;; TODO vfs-map* for physical-vfs
+
+(defmethod print-object ((vfs-path vfs-path) stream)
+  (print-unreadable-object (vfs-path stream :type t :identity t)
+    (format stream "~a ~s"
+	    (type-of (vfs-path-vfs vfs-path))
+	    (vfs-path-pathname vfs-path))))
+
+;; to test print-object
+#+nil
+(make-instance 'vfs-path
+	       :pathname "asdf"
+	       :vfs nil)
