@@ -33,7 +33,7 @@
      :directories t)))
 
 (defun repo-find-object (repo object-specifier)
-  "Find an object given a specifier (a hash, a partial hash"
+  "Find an object given a specifier (a hash, a partial hash)"
   (cond
     ;; If it's a full hash
     ((sha1p object-specifier) object-specifier)
@@ -86,4 +86,16 @@
        :for end :across register-ends
        :collect (subseq string start end))))
 
+(defun ensure-octets (data)
+  (typecase data
+    (string (flexi-streams:string-to-octets data))
+    (flexi-streams:octet data)
+    (t data)))
 
+(defun make-object (data)
+  (let* ((length (length data))
+	 (header (format nil "~d~c" length #\Null)))
+    (flexi-streams:with-output-to-sequence
+	(stream :element-type 'flexi-streams:octet)
+      (write-sequence (flexi-streams:string-to-octets header) stream)
+      (write-sequence (ensure-octets data) stream))))

@@ -38,8 +38,6 @@
 	     (:file "rfc2822-parser") ; to parse commits, trees and tags
 	     (:file "commands")	      ; command-line commands
 	     (:file "git")))
-   (:module "tests"
-	    :components ())
    (:module "samples"
 	    :components
 	    ((:file "samples")

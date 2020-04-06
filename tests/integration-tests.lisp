@@ -1,3 +1,10 @@
+#|
+Ideas:
+
+* List the objects in the file system
+  Then try to call "repo-find-object" on each.
+
+|#
 
 (in-package #:dill.test)
 
