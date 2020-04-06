@@ -92,9 +92,9 @@
     (flexi-streams:octet data)
     (t data)))
 
-(defun make-object (data)
+(defun make-object (type data)
   (let* ((length (length data))
-	 (header (format nil "~d~c" length #\Null)))
+	 (header (format nil "~(~a~) ~d~c" type length #\Null)))
     (flexi-streams:with-output-to-sequence
 	(stream :element-type 'flexi-streams:octet)
       (write-sequence (flexi-streams:string-to-octets header) stream)
