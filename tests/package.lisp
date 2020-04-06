@@ -1,6 +1,6 @@
 
 (defpackage #:dill.test
-  (:use :cl #.dill.asd:project-name #:alexandria)
+  (:use :cl #:dill #:alexandria)
   (:import-from
    #:parachute
    #:define-test

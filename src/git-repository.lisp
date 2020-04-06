@@ -1,5 +1,5 @@
 
-(in-package #.dill.asd:project-name)
+(in-package #:dill)
 
 (defclass git-repository ()
   ((worktree

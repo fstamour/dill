@@ -6,7 +6,7 @@
 ;;;; This parser works well, but it reads the whole file at once.
 
 
-(in-package #.dill.asd:project-name)
+(in-package #:dill)
 
 
 

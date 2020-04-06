@@ -1,6 +1,6 @@
 ;;;; scratch code, repl ftw
 
-(in-package #.dill.asd:project-name)
+(in-package #:dill)
 
 (defparameter *empty-readme-vfs*
   (make-instance 'memory-backed-vfs
@@ -74,3 +74,24 @@ the type can be one of these:
  * tag
  * blob
 |#
+
+(defun hash-vector)
+
+(ql:quickload :ironclad)
+
+(defparameter *octets*
+  (ironclad:digest-sequence :sha1
+			    (flexi-streams:string-to-octets "hi")))
+
+(with-output-to-string (stream)
+ (loop :for octets :across *octets*
+      :do (format stream "~(~x~)" octets)))
+
+(map 'string #'code-char *octets*)
+
+
+
+
+
+(let ((object (make-object :blob "hello")))
+  (parse-object object))

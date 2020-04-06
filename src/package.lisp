@@ -1,5 +1,5 @@
 
-(defpackage #.dill.asd:project-name
+(defpackage #:dill
   (:documentation "Write your own git")
   (:nicknames :git)
   (:use :cl
@@ -7,6 +7,4 @@
 	#:virtual-file-system
 	#:dill.utils))
 
-(in-package #.dill.asd:project-name)
-
-(defvar +project-name+ (string-downcase #.dill.asd:project-name))
+(in-package #:dill)

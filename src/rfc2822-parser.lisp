@@ -1,5 +1,5 @@
 
-(in-package #.dill.asd:project-name)
+(in-package #:dill)
 
 (defun position-double-newline (string)
   "Find the position of the first 2 consecutive newlines"

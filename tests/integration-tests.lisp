@@ -37,9 +37,9 @@ Ideas:
 
 (defun check-expected-pathnames (root-pathname expected-pathnames)
   (multiple-value-bind (_ extra-paths missing-paths)
-      (git::compare-hash-tables
-       (git::list-tree-as-hash-table root-pathname)
-       (git::list-hash-table expected-pathnames :test 'equal))
+      (dill::compare-hash-tables
+       (dill::list-tree-as-hash-table root-pathname)
+       (dill::list-hash-table expected-pathnames :test 'equal))
     (declare (ignore _))
     (unless (emptyp extra-paths)
       (error "There was more pathnames than expected:~%~{~& * \"~a\"~}"
@@ -67,14 +67,14 @@ Ideas:
 (define-test (integration "Tests git init in an empty directory") ()
   (false
    (with-temporary-directory (root)
-     (git::command-init (list root))
+     (dill::command-init (list root))
      (check-expected-pathnames root +git-init-expected-pathnames+))))
 
 (define-test (integration "Open an empty git-repository") ()
   (true
    (with-temporary-directory (root)
-     (git::command-init (list root))
+     (dill::command-init (list root))
      (let ((repository
-	    (git::make-git-repository root)))
+	    (dill::make-git-repository root)))
        (zerop
-	  (git::get-config repository "core" "repositoryformatversion"))))))
+	  (dill::get-config repository "core" "repositoryformatversion"))))))

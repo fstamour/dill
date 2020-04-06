@@ -1,7 +1,7 @@
 ;;;; This is where I put the code that is worth putting in the image,
 ;;;; but that doesn't yet belong to a specific category.
 
-(in-package #.dill.asd:project-name)
+(in-package #:dill)
 
 (defun repo-object-path (repository &optional hash)
   "Compute the path of an object given its hash"
@@ -70,12 +70,21 @@
 	     (subseq object
 		     0
 		     (position 0 object))))))
-      (list (first parts) (parse-integer (second parts)))))
+      (values (first parts) (parse-integer (second parts)))))
 
 (defun get-object-data (object)
   "extract an object's data"
+  (subseq object (1+ (position 0 object))))
+
+(defun get-object-data-as-string (object)
+  "extract an object's data and convert it to a string"
   (flexi-streams:octets-to-string
-   (subseq object (1+ (position 0 object)))))
+   (get-object-data object)))
+
+(defun parse-object (object)
+  (values
+   (parse-object-header object)
+   (get-object-data object)))
 
 (defun parse-author (string)
   (multiple-value-bind

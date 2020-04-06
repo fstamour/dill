@@ -1,5 +1,5 @@
 
-(in-package #.dill.asd:project-name)
+(in-package #:dill)
 
 (defparameter +commands+
   '(("add" . command-add)
