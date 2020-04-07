@@ -182,3 +182,9 @@ with the paths as keys and T as values (basically a set)."
 (equal
  (remove-prefix "./" "./readme")
  (remove-prefix "./" "readme"))
+
+(defun octets-to-hexadecimal-string (octets)
+  "Convert a vector of octets to a hexadecimal string."
+  (with-output-to-string (stream)
+    (loop :for octets :across octets
+          :do (format stream "~(~2,'0x~)" octets))))
