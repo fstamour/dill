@@ -10,3 +10,4 @@
       (dill::make-object :blob "hello")))
 
 ;; TODO make an object, read it, make it again
+;; use parse-object and make-object

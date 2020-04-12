@@ -19,6 +19,9 @@
     ("status" . command-status)
     ("tag" . command-tag)))
 
+(defparameter *default-virtual-file-system*
+  (make-instance 'vfs:physical-vfs))
+
 (defvar +default-git-configuration+
     "
 [core]
@@ -73,7 +76,7 @@
 (defun command-add ()
   (error "Not implemented"))
 
-(defun command-cat-file ()
+(defun command-cat-file (type object-specifier &key &allow-other-keys)
   (error "Not implemented"))
 
 (defun command-checkout ()

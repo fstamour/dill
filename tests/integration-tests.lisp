@@ -78,3 +78,12 @@ Ideas:
 	    (dill::make-git-repository root)))
        (zerop
 	  (dill::get-config repository "core" "repositoryformatversion"))))))
+
+(define-test (integration "Open an empty git-repository") ()
+  (true
+   (with-temporary-directory (root)
+     (dill::command-init (list root))
+     (let ((repository
+	           (dill::make-git-repository root)))
+       (zerop
+	      (dill::get-config repository "core" "repositoryformatversion"))))))

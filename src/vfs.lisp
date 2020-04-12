@@ -1,7 +1,7 @@
 
 (defpackage #:virtual-file-system
   (:nicknames #:vfs)
-  (:use #:cl #:alexandria)
+  (:use #:cl)
   (:import-from
    #:dill.utils
    #:remove-prefix)
@@ -21,6 +21,12 @@
    #:vfs-map
    #:vfs-map-files
    #:vfs-map-directories
+
+   ;; Read/write
+   #:read-file-into-byte-vector
+   #:read-file-into-byte-string
+   #:write-byte-vector-into-file
+   #:write-string-vector-into-file
 
    ;; Support function
    #:read-archive-into-memory
@@ -179,3 +185,23 @@
 (make-instance 'vfs-path
 	       :pathname "asdf"
 	       :vfs nil)
+
+;; (defgeneric vfs-merge-pathnames pathname (:or vfs vfs-path))
+
+(defgeneric read-file-into-byte-vector (vfs pathname))
+(defgeneric read-file-into-byte-string (vfs pathname))
+(defgeneric write-byte-vector-into-file (vfs bytes pathname &key if-exists if-does-not-exist))
+(defgeneric write-string-vector-into-file (vfs string pathname &key if-exists if-does-not-exist external-format))
+
+(defmethod read-file-into-byte-vector ((vfs physical-vfs) pathname)
+  (declare (ignore vfs))
+  (alexandria:read-file-into-byte-vector pathname))
+(defmethod read-file-into-byte-string ((vfs physical-vfs) pathname)
+  (declare (ignore vfs))
+  (alexandria:read-file-into-string pathname))
+(defmethod write-byte-vector-into-file ((vfs physical-vfs) bytes pathname &rest options &key if-exists if-does-not-exist)
+  (declare (ignore if-exists if-does-not-exist))
+  (apply #'alexandria:write-byte-vector-into-file bytes pathname options))
+(defmethod write-string-vector-into-file ((vfs physical-vfs) string pathname &rest options &key if-exists if-does-not-exist external-format)
+  (declare (ignore if-exists if-does-not-exist external-format))
+  (apply #'alexandria:write-string-into-file string pathname options))
