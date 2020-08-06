@@ -29,9 +29,12 @@
 
 (in-package #:dill.utils)
 
-(defun length=1 (list)
-  (and (listp list)
-       (null (cdr list))))
+(defun length=1 (sequence)
+  "Check if a sequence as exaclty 1 element."
+  (or
+   (and (listp sequence)
+	(null (cdr sequence)))
+   (= 1 (length sequence))))
 
 (defun parent-directory (pathname)
   "Create a pathname, it probably has bugs."

@@ -14,6 +14,7 @@
   :components ((:module tests
                 :components
                 ((:file "package")
+		 (:file "config-parser")
 		 (:file "objects")
                  (:file "integration-tests")
                  (:file "tests")))))

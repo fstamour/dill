@@ -8,17 +8,13 @@
 
 (in-package #:dill)
 
-
-
 ;; This is from alexa's documentation
 (defun lex-line (string make-lexer-fn)
-  "Tokenize a string
-Take a string and a lexer-constructor."
+  "Tokenize a string. Takes a string and a lexer-constructor."
   (loop :with lexer := (funcall make-lexer-fn string)
-        :for tok := (funcall lexer)
-        :while tok
-          :collect tok))
-
+     :for tok := (funcall lexer)
+     :while tok
+     :collect tok))
 
 (alexa:define-string-lexer config-lexer
     ()
@@ -41,7 +37,7 @@ Take a string and a lexer-constructor."
 (defun parse-config (string
 		     &optional (config
 				(make-hash-table :test 'equal)))
-  "Parse a config file, returns a recursive hash-table.
+  "Parse a config file, returns a nested (2 level) hash-table.
 The top-level hash-table is the sections, the other is the key-values"
   (let ((current-section))
     (loop :for line :in (split-by-newline
@@ -65,46 +61,8 @@ The top-level hash-table is the sections, the other is the key-values"
 		     value-list)))))
     config))
 
-#+nil
-(let ((config
-       (parse-config "
-
-# a comment
-[core]
-    repositoryformatversion = 0
-    filemode = true # another comment  
-    bare = false
-    logallrefupdates = true
-    # and multiline comments \\
- that goes on and on
-
-
-")))
-  (mapcar #'(lambda (el)
-	      (if (hash-table-p el)
-		  (hash-table-plist el)
-		  el))
-	  (hash-table-plist config)))
-
-#+nil
-(get-config 
- (make-git-repository *empty-repository*)
- "core"
- "repositoryformatversion")
-;; => 0
-
-#+nil
-(get-config 
- (make-git-repository *empty-repository*)
- "unicorn"
- "don't exists")
-;; => nil
-
 (defun parse-ref (string)
   (second
    (split-sequence:split-sequence
     #\space string
     :remove-empty-subseqs t)))
-
-;; (parse-ref "ref: refs/heads/master")
-;; => "refs/heads/master"
