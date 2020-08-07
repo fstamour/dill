@@ -19,7 +19,7 @@ containerId=$(docker create $tag)
 echo Container ID: $containerId
 
 # copy the build_outputs from the container
-docker cp ${containerId}:/build_outputs build_outputs/
+docker cp ${containerId}:/build_outputs .
 
 # remove the container
 docker rm $containerId
