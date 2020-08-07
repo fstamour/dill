@@ -1,12 +1,8 @@
 
 (defpackage #:dill.asd
-  (:use :cl :asdf)
-  (:export #:project-name))
+  (:use :cl :asdf))
 
 (in-package #:dill.asd)
-
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (defvar project-name :git))
 
 (asdf:defsystem #:dill
   :description "Implementation of git purely in common lisp"
@@ -21,8 +17,8 @@
 	             #:cl-fad                 ; paths, files and folders
 	             #:flexi-streams          ; octets <-> strings
 	             #:gzip-stream            ; to read gzip file
-               #:ironclad               ; for digests (sha1)
-	             #:split-sequence
+		     #:ironclad               ; for digests (sha1)
+		     #:split-sequence
 	             #:optima                 ; pattern matching
 	             #:vas-string-metrics     ; string distance
 	             #:zlib)

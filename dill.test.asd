@@ -12,10 +12,11 @@
   :perform (asdf:test-op (op c) (uiop:symbol-call :dill.test :test-all))
   :serial t
   :components ((:module tests
-                :components
-                ((:file "package")
-		 (:file "config-parser")
-		 (:file "objects")
-                 (:file "integration-tests")
-                 (:file "tests")))))
+			:components
+			((:file "package")
+			 (:file "config-parser")
+			 (:file "objects")
+			 (:file "commands")
+			 (:file "integration-tests")
+			 (:file "tests")))))
 

@@ -2,22 +2,23 @@
 (in-package #:dill)
 
 (defparameter +commands+
-  '(("add" . command-add)
-    ("cat-file" . command-cat-file)
-    ("checkout" . command-checkout)
-    ("commit" . command-commit)
+  '(;; ("add" . command-add)
+    ;; ("cat-file" . command-cat-file)
+    ;; ("checkout" . command-checkout)
+    ;; ("commit" . command-commit)
     ("hash-object" . command-hash-object)
     ("help" . command-help)
     ("init" . command-init)
-    ("log" . command-log)
-    ("ls-tree" . command-ls-tree)
-    ("merge" . command-merge)
-    ("rebase" . command-rebase)
-    ("rev-parse" . command-rev-parse)
-    ("rm" . command-rm)
-    ("show-ref" . command-show-ref)
-    ("status" . command-status)
-    ("tag" . command-tag)))
+    ;; ("log" . command-log)
+    ;; ("ls-tree" . command-ls-tree)
+    ;; ("merge" . command-merge)
+    ;; ("rebase" . command-rebase)
+    ;; ("rev-parse" . command-rev-parse)
+    ;; ("rm" . command-rm)
+    ;; ("show-ref" . command-show-ref)
+    ;; ("status" . command-status)
+    ;; ("tag" . command-tag)
+    ))
 
 (defparameter *default-virtual-file-system*
   (make-instance 'vfs:physical-vfs))
@@ -42,28 +43,28 @@
 
 (defun command-init (directory &key bare &allow-other-keys)
   (let ((directories '(".git/refs/heads/"
-		                   ".git/refs/tags/"
-		                   ".git/objects/info/"
-		                   ".git/objects/packs/"
-		                   ".git/hooks/"
-		                   ".git/info/exclude"
-		                   ".git/branches/"))
-	      (files `((".git/HEAD" . "ref: refs/heads/master")
-		             (".git/config" . ,+default-git-configuration+)
-		             (".git/description" . "Unnamed repository; edit this file 'description' to name the repository.")
-		             (".git/info/exclude" . "")))
-	      ;; TODO (listp directory) (so we can call (command-init "dir")
-	      ;;        instead of (command-init '("dir"))
-	      ;; TODO check if (length directory) > 1
-	      (root (cl-fad:pathname-as-directory (or (first directory) "."))))
+		       ".git/refs/tags/"
+		       ".git/objects/info/"
+		       ".git/objects/packs/"
+		       ".git/hooks/"
+		       ".git/info/exclude"
+		       ".git/branches/"))
+	(files `((".git/HEAD" . "ref: refs/heads/master")
+		 (".git/config" . ,+default-git-configuration+)
+		 (".git/description" . "Unnamed repository; edit this file 'description' to name the repository.")
+		 (".git/info/exclude" . "")))
+	;; TODO (listp directory) (so we can call (command-init "dir")
+	;;        instead of (command-init '("dir"))
+	;; TODO check if (length directory) > 1
+	(root (cl-fad:pathname-as-directory (or (first directory) "."))))
     ;; create the directories
     (loop :for directory :in directories
-          :do (ensure-directories-exist
-	             (merge-pathnames directory root)))
+       :do (ensure-directories-exist
+	    (merge-pathnames directory root)))
     ;; create the files
     (loop :for (file . content) :in files
-          :do (alexandria:write-string-into-file
-	             content (merge-pathnames file root)))
+       :do (alexandria:write-string-into-file
+	    content (merge-pathnames file root)))
     (format t "Initialized empty Git repository in \"~a\"." directory)))
 
 (defun usage-init ()
@@ -85,11 +86,13 @@
 (defun command-commit ()
   (error "Not implemented"))
 
-(defun command-hash-object ()
-  (error "Not implemented"))
+;; TODO aliases ((:t . :type) (:w . writep))
+(defun command-hash-object (file &key writep type)
+  (make-object type
+               (vfs:read-file-into-byte-vector *default-virtual-file-system* object)))
 
 (defun command-help ()
-  (let* ((prelude (format nil "usage: ~a " +project-name+))
+  (let* ((prelude (format nil "usage: dill"))
 	 (prelude-length (length prelude)))
     (format t (concatenate 'string
 			   "~&~a[--help]~%"
@@ -100,7 +103,7 @@
 	    prelude-length " "
 	    +commands+)
     (loop :for (name . _) :in +commands+
-	 :do (format t "~&        ~(~a~)" name))))
+       :do (format t "~&        ~(~a~)" name))))
 
 
 (defun command-log ()
@@ -121,10 +124,10 @@
 (defun command-rm ()
   (error "Not implemented"))
 
-(defun command-status ()
+(defun command-show-ref ()
   (error "Not implemented"))
 
-(defun command-show-ref ()
+(defun command-status ()
   (error "Not implemented"))
 
 (defun command-tag ()
@@ -156,36 +159,37 @@
 	  +project-name+ command-name)
   (suggest-command command-name))
 
-;; wrapper around apply-argv:parse-argv that normalizes the output
-;; by always returning a list as the first argument
-(defun parse-argv (argv)
-  (let ((arguments (apply-argv:parse-argv argv)))
-    (if (or
-	 (null arguments)
-	 (not (listp (first arguments))))
-	`(() ,@arguments)
-	arguments)))
+(defun replace-aliases (arguments aliases)
+  (loop :for (key value) :on arguments :by #'cddr
+     :append (list (or (assoc-value aliases key) key) value)))
 
-#|
-(parse-argv '())
-;; => '(nil)
-(parse-argv '("--version"))
-;; => (nil :version t)
-(parse-argv '("--tag" "2.0"))
-;; => (nil :tag "2.0")
-|#
+(defun parse-argv (argv &optional aliases)
+  "Wrapper around apply-argv:parse-argv that normalizes the output by
+ always returning a list as the first argument"
+  (when argv
+      (let ((arguments (apply-argv:parse-argv argv)))
+	(if (listp (first arguments))
+	    `(,(first arguments) ,@(replace-aliases (rest arguments) aliases))
+	    `(() ,@(replace-aliases arguments aliases))))))
 
+;; TODO implement aliases (document the problem too)
+;; TODO suggest "--all" if the user entered "-all"
 (defun main (args)
   (let* ((first-argument (second args))
 	 (command (find-command first-argument))
 	 (command-arguments (cddr args)))
     (cond
+      ;; If there's no arguments.
       ((null first-argument)
        (command-help))
+      ;; If the command is unknown
       ((null command)
        (unknown-command first-argument))
+      ;; Parse the rest of the arguments and run the command
       (t
-       (apply command (parse-argv command-arguments))))))
+       (apply command (parse-argv command-arguments))))
+    (fresh-line)))
+
 
 #|
 Those two should do the same thing:
